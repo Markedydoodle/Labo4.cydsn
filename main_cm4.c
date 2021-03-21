@@ -34,7 +34,7 @@ int main(void)
     __enable_irq(); /* Enable global interrupts. */
 
     
-    xTaskCreate(LED_TASK,"LED_TASK",400,NULL,1,0);
+    xTaskCreate(LED_TASK,"LED_TASK",80,NULL,1,0);
     vTaskStartScheduler();
     for(;;)
     {
