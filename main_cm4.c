@@ -9,6 +9,8 @@
  *
  * ========================================
 */
+//https://github.com/Markedydoodle/Labo4.cydsn 
+
 #include "project.h"
 #include "FreeRTOS.h"
 #include "task.h"
@@ -68,6 +70,7 @@ void bouton_task()
     xSemaphoreGive(bouton_semph);
 }
 
+//Part 3a
 task_params_t task_A = {
     .delay = 1000,
     .message = "Tache A en cours\n\r"
@@ -83,9 +86,21 @@ void print_loop(task_params_t * params)
     for(;;)
     {
         vTaskDelay(pdMS_TO_TICKS(params->delay));
-        UART_PutString(params->message);
+        UART_PutString(params->message);                  //Consiste à la fin du code original pour 3a
+        //xQueueSend(print_queue, (task_params_t*) &params->message, pdMS_TO_TICKS(params->delay));           //Consiste à un essaie de faire 3b
     }
-    
+}
+
+//Part 3b
+QueueHandle_t print_queue;
+
+void print()
+{
+    char*message;
+    for (;;) {
+        xQueueReceive(print_queue, &message, portMAX_DELAY);
+        UART_PutString(message);
+    }
 }
 
 int main(void)
@@ -104,6 +119,8 @@ int main(void)
     //Part 1
     xTaskCreate(LED_TASK,"LED_TASK",80,NULL,3,NULL);
     xTaskCreate(bouton_task,"samaphore_TASK",400,NULL,1,NULL);
+    
+    //Part 3a
     xTaskCreate(
         print_loop,
         "Task A",
@@ -119,7 +136,9 @@ int main(void)
         1,
         NULL);
     
-    //print_loop(&task_A);
+    //Part 3b
+    print_queue = xQueueCreate(2, sizeof(char *));
+    
     
     vTaskStartScheduler();
     for(;;)
