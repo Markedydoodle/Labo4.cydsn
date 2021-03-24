@@ -68,6 +68,26 @@ void bouton_task()
     xSemaphoreGive(bouton_semph);
 }
 
+task_params_t task_A = {
+    .delay = 1000,
+    .message = "Tache A en cours\n\r"
+};
+
+task_params_t task_B = {
+    .delay = 999,
+    .message = "Tache B en cours\n\r"
+};
+
+void print_loop(task_params_t * params)
+{
+    for(;;)
+    {
+        vTaskDelay(pdMS_TO_TICKS(params->delay));
+        UART_PutString(params->message);
+    }
+    
+}
+
 int main(void)
 {
     __enable_irq(); /* Enable global interrupts. */
@@ -84,6 +104,23 @@ int main(void)
     //Part 1
     xTaskCreate(LED_TASK,"LED_TASK",80,NULL,3,NULL);
     xTaskCreate(bouton_task,"samaphore_TASK",400,NULL,1,NULL);
+    xTaskCreate(
+        print_loop,
+        "Task A",
+        configMINIMAL_STACK_SIZE,
+        (void *) &task_A,
+        1,
+        NULL);  
+    xTaskCreate(
+        print_loop,
+        "Task B",
+        configMINIMAL_STACK_SIZE,
+        (void *) &task_B,
+        1,
+        NULL);
+    
+    //print_loop(&task_A);
+    
     vTaskStartScheduler();
     for(;;)
     {
